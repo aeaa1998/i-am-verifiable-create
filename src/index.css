@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Vee select vars */
+:root {
+    --vw-bg-opacity: 1;
+    --vs-search-input-bg: rgb(243 244 246 / var(--vw-bg-opacity));
+    --vs-selected-bg: rgb(243 244 246 / var(--vw-bg-opacity));
+    --vs-dropdown-option-bg: rgb(243 244 246 / var(--vw-bg-opacity));
+    --vs-dropdown-bg: rgb(243 244 246 / var(--vw-bg-opacity));
+    --vs-border-width: 0px;
+    --vs-selected-bg: white;
+}
