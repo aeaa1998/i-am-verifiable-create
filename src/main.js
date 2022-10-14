@@ -48,7 +48,7 @@ setLocale('es')
 //Axios config
 import axios from 'axios';
 const _axios = axios.create({
-  baseURL: 'http://localhost:3000/'
+  baseURL: 'http://ec2-18-218-183-200.us-east-2.compute.amazonaws.com/'
 })
 
 window._axios = _axios

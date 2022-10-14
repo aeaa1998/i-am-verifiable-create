@@ -74,6 +74,11 @@ export default {
         })
        },
 
+       updateCandyMachine(store, candyMachine){
+          const key = candyMachine.address.toBase58()
+          store.state.candyMachinesMapped[key] = candyMachine
+       },
+
        async getCandyMachines(store, mintAddress = undefined){
         const { state, getters }  = store
         const { metaplex } = useWorkspace();

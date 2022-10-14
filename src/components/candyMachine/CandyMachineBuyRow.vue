@@ -1,9 +1,9 @@
 <template>
-  <div class="py-4">
+  <div class="py-4 px-2">
     <h6 class="text-gray-500">Precio de este dispensador</h6>
     <h2 class="text-primary-700 font-bold text-3xl my-2">{{ amount }}</h2>
     <div class="mb-4">En este dispensador se poseen {{ candyMachine.itemsRemaining.toString() }} disponibles</div>
-    <button
+    <!-- <button
       class="py-3 px-8 rounded-lg text-white"
       :class="{
         'purchase-button': !isInValid,
@@ -13,20 +13,37 @@
       @click="purchaseNft"
     >
       {{ buttonText }}
-    </button>
+    </button> -->
+    <IAmVerifiableButton
+      class="py-3 px-8 rounded-lg text-white"
+      :class="{
+        'purchase-button': !isInValid,
+        'purchase-button-disabled': isInValid,
+      }"
+      :disabled="isInValid"
+      v-model:isVerifying="isVerifying"
+      @verification:failed="validationFailed"
+      @verification:succeded="purchaseNft"
+      :requisites="requisites ?? []"
+    >
+      {{ buttonText }}
+    </IAmVerifiableButton>
   </div>
 </template>
 <script setup>
 import { formatAmount } from "@metaplex-foundation/js";
 import { computed, ref, toRefs } from "vue";
-import { useIamVerification, useNftsOfUser, normalizeNft } from "@/composables/useIAmVerifiable";
+import { useIamVerification, useNftsOfUser, normalizeNft } from "i-am-verifiable-button/src/useIAmVerifiable";
+import IAmVerifiableButton from "i-am-verifiable-button";
+// import "i-am-verifiable-button/src/css/main.css";
 import { useWorkspace, getKeyPair } from "@/composables/useWorkspace";
 import { amountToNumber } from "@/composables/useAmount";
 import { notify } from "@kyvg/vue3-notification";
 import { useStore } from "vuex";
 import { useWallet } from "solana-wallets-vue";
 import { LAMPORTS_PER_SOL, SystemProgram, Transaction } from "@solana/web3.js";
-const emit = defineEmits(["purchase:started", "purchase:ended"]);
+
+const emit = defineEmits(["purchase:started", "purchase:succeded", "purchase:ended"]);
 const store = useStore();
 const props = defineProps(["candyMachine", "requisites", "nft", "disabledExternal"]);
 const { candyMachine, nft, disabledExternal } = toRefs(props);
@@ -45,13 +62,21 @@ const verifyButton = async () => {
   return value;
 };
 
+const validationFailed = () => {
+  notify({
+    type: "error",
+    title: "No se poseen los requisitos necesarios para poder comprar esta credencial.",
+  });
+};
+
 const purchaseNft = async () => {
   const { metaplex, connectionConfirm: connection } = useWorkspace();
   const { publicKey } = getKeyPair();
   isPurchasing.value = true;
   const { wallet, sendTransaction, publicKey: _walletPub } = useWallet();
   emit("purchase:started");
-  const isValid = await verifyButton();
+  // const isValid = await verifyButton();
+  const isValid = true;
   if (isValid) {
     try {
       const userId = wallet.value;
@@ -88,6 +113,7 @@ const purchaseNft = async () => {
         });
 
         nftsOfUser.value.push(normalizeNft(response.data.nft));
+        emit("purchase:succeded", candyMachine);
         notify({
           type: "success",
           title: "Se ha comprado con éxito la credencial.",
@@ -111,10 +137,7 @@ const purchaseNft = async () => {
       }
     }
   } else {
-    notify({
-      type: "error",
-      title: "No se poseen los requisitos necesarios para poder comprar esta credencial.",
-    });
+    validationFailed();
   }
   isPurchasing.value = false;
   emit("purchase:ended");

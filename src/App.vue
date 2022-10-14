@@ -14,7 +14,8 @@ import { NavBar } from "./components/navbar";
 
 import { initWallet, useWallet } from "solana-wallets-vue";
 import * as LottiePlayer from "@lottiefiles/lottie-player";
-import { initIamVerifiable } from "@/composables/useIAmVerifiable";
+// import { initIamVerifiable } from "@/composables/useIAmVerifiable";
+import { initIamVerifiable } from "i-am-verifiable-button/src/useIAmVerifiable";
 import { onMounted, watch } from "vue-demi";
 const walletOptions = {
   wallets: [new PhantomWalletAdapter()],

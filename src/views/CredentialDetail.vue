@@ -31,7 +31,7 @@
 
     <template v-else>
       <!-- Image and description -->
-      <div class="flex flex-wrap w-full md:w-3/5 lg:w-2/6 gap-y-8">
+      <div class="flex flex-wrap w-full md:w-2/5 lg:w-2/6 gap-y-8">
         <img :src="imageSrc" v-if="imageSrc" class="credential-cover" />
         <div v-else class="credential-cover" />
         <!-- Description -->
@@ -49,30 +49,33 @@
           </div>
         </div>
       </div>
-      <div class="grow px-8 flex flex-col gap-y-4">
-        <h1 class="text-3xl font-bold">{{ nft.name }}</h1>
-        <h1 class="text-base font-light">hecho por RENAP</h1>
-        <div class="w-full rounded-lg border border-slate-300 overflow-clip">
-          <h1 class="text-xl p-3 text-center font-bold border-b border-slate-300">Configuración</h1>
-          <div class="text-base p-3 w-full bg-slate-300/20">{{ expirationText }}</div>
-        </div>
-        <div class="w-full rounded-lg border border-slate-300 overflow-clip">
-          <div class="text-lg p-3 text-center font-bold border-b border-slate-300">Detalles de compra</div>
-          <div class="text-base p-3 w-full bg-slate-300/20">
-            <v-spinner v-if="isFetchingCandyMachines" />
-            <div v-else-if="!candyMachines.length">No hay opciónes de compra por el momento</div>
-            <div class="flex flex-wrap" v-else>
-              <candy-machine-buy-row
-                @purchase:started="disabledExternal = true"
-                @purchase:ended="disabledExternal = false"
-                :disabledExternal="disabledExternal"
-                class="border-b border-gray-300 last:border-b-0"
-                v-for="candyMachine in candyMachines"
-                :key="candyMachine.address.toBase58()"
-                :candyMachine="candyMachine"
-                :nft="nft"
-                :requisites="nft.json.requisites ?? []"
-              />
+      <div class="px-8 w-full md:w-3/5 lg:w-4/6">
+        <div class="flex flex-col gap-y-4">
+          <h1 class="text-3xl font-bold">{{ nft.name }}</h1>
+          <h1 class="text-base font-light">hecho por RENAP</h1>
+          <div class="w-full rounded-lg border border-slate-300 overflow-clip">
+            <h1 class="text-xl p-3 text-center font-bold border-b border-slate-300">Configuración</h1>
+            <div class="text-base p-3 w-full bg-slate-300/20">{{ expirationText }}</div>
+          </div>
+          <div class="w-full rounded-lg border border-slate-300 overflow-clip">
+            <div class="text-lg p-3 text-center font-bold border-b border-slate-300">Detalles de compra</div>
+            <div class="text-base p-3 w-full bg-slate-300/20">
+              <v-spinner v-if="isFetchingCandyMachines" />
+              <div v-else-if="!candyMachines.length">No hay opciónes de compra por el momento</div>
+              <div class="flex flex-wrap" v-else>
+                <candy-machine-buy-row
+                  @purchase:started="disabledExternal = true"
+                  @purchase:ended="disabledExternal = false"
+                  @purchase:succeded="refreshCandyMachine"
+                  :disabledExternal="disabledExternal"
+                  class="border-b border-gray-300 last:border-b-0 md:w-full lg:w-1/2 xl:w-1/3"
+                  v-for="candyMachine in candyMachines"
+                  :key="candyMachine.address.toBase58()"
+                  :candyMachine="candyMachine"
+                  :nft="nft"
+                  :requisites="nft.json.requisites ?? []"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -85,8 +88,10 @@ import { PublicKey } from "@solana/web3.js";
 import { computed, onMounted, ref } from "vue-demi";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
-import { useRequisites, useNftsOfUser } from "@/composables/useIAmVerifiable";
+// import { useRequisites, useNftsOfUser } from "@/composables/useIAmVerifiable";
+import { useRequisites, useNftsOfUser } from "i-am-verifiable-button/src/useIAmVerifiable";
 import { CandyMachineBuyRow } from "@/components/candyMachine";
+import { useWorkspace } from "@/composables/useWorkspace";
 
 const route = useRoute();
 const store = useStore();
@@ -122,6 +127,13 @@ const candyMachines = computed(() => {
   }
   return [];
 });
+
+const refreshCandyMachine = async (candyMachine) => {
+  const key = candyMachine.collectionMintAddress.toBase58();
+  const { metaplex } = useWorkspace();
+  const updated = metaplex.value.candyMachines().refresh(candyMachine).run();
+  store.dispatch("updateCandyMachine", updated);
+};
 
 const getNftFromMintAddress = async () => {
   isFetchingNft.value = true;
