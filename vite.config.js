@@ -6,14 +6,17 @@ import { fileURLToPath, URL } from "url";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/i-am-verifiable-create/',
-  plugins: [vue({
-    template: {
-      // compilerOptions: {
-      //   isBuiltInComponent: (tag) => ['lottie-player'].includes(tag)
-      // }
-    }
-  })],
+  // base: '/i-am-verifiable-create/',
+  plugins: [
+    vue({
+      template: {
+        // compilerOptions: {
+        //   isBuiltInComponent: (tag) => ['lottie-player'].includes(tag)
+        // }
+      }
+    }),
+    
+],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -21,7 +24,8 @@ export default defineConfig({
       events: "rollup-plugin-node-polyfills/polyfills/events",
       assert: "assert",
       crypto: "crypto-browserify",
-      util: "util",
+      util: "util"
+
     },
   },
   define: {
@@ -30,13 +34,15 @@ export default defineConfig({
   build: {
     target: "esnext",
     rollupOptions: {
-      plugins: [nodePolyfills({ crypto: true })],
+      plugins: [
+        nodePolyfills({ crypto: true })
+      ],
     },
   },
   optimizeDeps: {
     esbuildOptions: {
-      plugins: [NodeGlobalsPolyfillPlugin({ buffer: true })],
-      target: 'esnext'
+    target: "esnext",
+      plugins: [NodeGlobalsPolyfillPlugin({ buffer: true })]
     },
   },
 })

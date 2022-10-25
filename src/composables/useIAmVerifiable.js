@@ -55,7 +55,7 @@ const findRequisitesByMintList = async (requisites) => {
 
     if(missingRequisites && missingRequisites.length){
         //Fetch the missing
-        const _nfts = await metaplex.nfts().findAllByMintList({ mints: requisites.map(req => new PublicKey(req)) }).run()
+        const _nfts = await metaplex.nfts().findAllByMintList({ mints: requisites.map(req => new PublicKey(req)) })
         _nfts.forEach(nft => {
             localStorage.setItem(getKey(nft.mintAddress ? nft.mintAddress.toBase58() : nft.mint.address.toBase58()), serializeNft(nft))
         })
@@ -135,7 +135,6 @@ export function initIamVerifiable() {
         if(newValueConnected){    
             isFetchingNftsOfUser.value = true
             nftsOfUser.value = await fetchUserNfts(isFetchingNftsOfUser)
-            console.log(nftsOfUser.value)
             isFetchingNftsOfUser.value = false
         }
     }, { immediate: true })
@@ -147,6 +146,7 @@ export function initIamVerifiable() {
 }
 
 export async function useIamVerification(requisites){
+    const startTime = new Date();
     requisites = requisites.value  ? requisites.value : requisites
     
     if(!requisites.length) return true
@@ -164,7 +164,9 @@ export async function useIamVerification(requisites){
 
         let credentilsOfCollection = nftsOfUser.value.map(credential => credential.collection.address.toBase58())
         const isContained = requisites.every(req => credentilsOfCollection.includes(req))
-        
+        const endTime = new Date();
+        const timeDifference = (endTime - startTime)/1000
+        console.log("Verification duration was ", Math.round(timeDifference))
         return isContained
         
         

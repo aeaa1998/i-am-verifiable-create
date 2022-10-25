@@ -64,12 +64,12 @@
               <div v-else-if="!candyMachines.length">No hay opciónes de compra por el momento</div>
               <div class="flex flex-wrap" v-else>
                 <candy-machine-buy-row
-                  @purchase:started="disabledExternal = true"
-                  @purchase:ended="disabledExternal = false"
-                  @purchase:succeded="refreshCandyMachine"
                   :disabledExternal="disabledExternal"
                   class="border-b border-gray-300 last:border-b-0 md:w-full lg:w-1/2 xl:w-1/3"
                   v-for="candyMachine in candyMachines"
+                  @purchase:started="disabledExternal = true"
+                  @purchase:ended="disabledExternal = false"
+                  @purchase:succeded="() => refreshCandyMachine(candyMachine)"
                   :key="candyMachine.address.toBase58()"
                   :candyMachine="candyMachine"
                   :nft="nft"
@@ -85,7 +85,7 @@
 </template>
 <script setup>
 import { PublicKey } from "@solana/web3.js";
-import { computed, onMounted, ref } from "vue-demi";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 // import { useRequisites, useNftsOfUser } from "@/composables/useIAmVerifiable";
@@ -129,9 +129,9 @@ const candyMachines = computed(() => {
 });
 
 const refreshCandyMachine = async (candyMachine) => {
-  const key = candyMachine.collectionMintAddress.toBase58();
+  const key = typeof candyMachine.collectionMintAddress == "string" ? candyMachine.collectionMintAddress : candyMachine.collectionMintAddress.toBase58();
   const { metaplex } = useWorkspace();
-  const updated = metaplex.value.candyMachines().refresh(candyMachine).run();
+  const updated = metaplex.value.candyMachinesV2().refresh(candyMachine);
   store.dispatch("updateCandyMachine", updated);
 };
 

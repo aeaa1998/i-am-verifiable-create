@@ -23,8 +23,9 @@
       :disabled="isInValid"
       v-model:isVerifying="isVerifying"
       @verification:failed="validationFailed"
-      @verification:succeded="purchaseNft"
+      @verification:succeded="validationFailed"
       :requisites="requisites ?? []"
+      log
     >
       {{ buttonText }}
     </IAmVerifiableButton>
@@ -131,7 +132,7 @@ const purchaseNft = async () => {
           title: "Ocurrio un error al generar la credencial si los problemas persisten refresca la página.",
         });
         //Refresh the candy machine
-        const updatedCandyMachine = await metaplex.value.candyMachines().refresh(candyMachine.value).run();
+        const updatedCandyMachine = await metaplex.value.candyMachinesV2().refresh(candyMachine.value);
         const key = updatedCandyMachine.address.toBase58();
         store.state.credentials.candyMachinesMapped[key] = updatedCandyMachine;
       }

@@ -16,15 +16,16 @@ import { initWallet, useWallet } from "solana-wallets-vue";
 import * as LottiePlayer from "@lottiefiles/lottie-player";
 // import { initIamVerifiable } from "@/composables/useIAmVerifiable";
 import { initIamVerifiable } from "i-am-verifiable-button/src/useIAmVerifiable";
-import { onMounted, watch } from "vue-demi";
+import { onMounted, watch } from "vue";
 const walletOptions = {
   wallets: [new PhantomWalletAdapter()],
   autoConnect: true,
 };
 
 initWallet(walletOptions);
-initIamVerifiable();
+
 initWorkspace();
+initIamVerifiable(walletOptions);
 const { wallet, connected } = useWallet();
 watch(
   connected,

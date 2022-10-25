@@ -31,7 +31,7 @@ export default {
             const _nft = await metaplex.value
                 .nfts()
                 .load({ metadata })
-                .run()
+                
                 
             state.nftsMapped[_nft.mint.address.toBase58()] = _nft
             } catch {
@@ -42,7 +42,7 @@ export default {
 
       async getNftFromMintAddress({ state, dispatch }, mintAddress){
         const { metaplex } = useWorkspace()
-        const nft = await metaplex.value.nfts().findByMint({ mintAddress }).run();
+        const nft = await metaplex.value.nfts().findByMint({ mintAddress });
         const key = nft.mint.address.toBase58()
         if(!state.nftsAddresses.includes(key)){
           state.nftsAddresses.push(key)
@@ -55,7 +55,7 @@ export default {
         const { metaplex } = useWorkspace()
         const { state }  = store
         const { publicKey } = getKeyPair()
-        const nfts = await metaplex.value.nfts().findAllByOwner({ owner : publicKey }).run()
+        const nfts = await metaplex.value.nfts().findAllByOwner({ owner : publicKey })
         nfts.forEach((nft) => {
           if(nft.uri != "" && nft.uri != null){
             const key = nft.mintAddress.toBase58()
@@ -84,7 +84,7 @@ export default {
         const { metaplex } = useWorkspace();
         const { publicKey } = getKeyPair()
         if(!mintAddress || !(mintAddress in getters.candyMachinesMintMapped)){
-          const candyMachines = await metaplex.value.candyMachines().findAllBy({ type: "wallet", publicKey: publicKey }).run();
+          const candyMachines = await metaplex.value.candyMachinesV2().findAllBy({ type: "wallet", publicKey: publicKey });
           candyMachines.forEach((candyMachine) => {
             //Use the mint address
             //Alias the nft

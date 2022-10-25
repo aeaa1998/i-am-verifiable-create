@@ -48,7 +48,7 @@ setLocale('es')
 //Axios config
 import axios from 'axios';
 const _axios = axios.create({
-  baseURL: 'http://ec2-18-218-183-200.us-east-2.compute.amazonaws.com/'
+  baseURL: 'https://iamverifiable.xyz/'
 })
 
 window._axios = _axios
