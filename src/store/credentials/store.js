@@ -14,7 +14,9 @@ export default {
         nftsModels: (state, getters) =>  getters.nfts.filter(nft => nft.model != "metadata" && nft.uri != "" && nft.json && nft.json.model == "credential" && nft.collection == null),
         candyMachinesMapped: (state) => state.candyMachinesMapped,
         candyMachinesAddresses: (state) => state.candyMachinesAddresses,
-        candyMachines: (state) => state.candyMachinesAddresses.reduce((acc, c) => [...acc, state.candyMachinesMapped[c]], []),
+        candyMachines: (state) => state.candyMachinesAddresses.reduce((acc, c) => [...acc, state.candyMachinesMapped[c]], []).filter((candyMachine) => {
+            return candyMachine.itemsRemaining.toString() != '0'
+          }),
         candyMachinesMintMapped: (state, getters) => getters.candyMachines
         .reduce((acc, candyMachine) => {
             const key = candyMachine.collectionMintAddress.toBase58()

@@ -179,7 +179,6 @@ export async function useIamVerification(requisites){
         z
         let credentilsOfCollection = nftsOfUser.value
         .filter(credential => {
-            console.log(credential)
             const expiration = credential.json.expiration
             if(!expiration){
                 return true

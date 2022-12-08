@@ -6,9 +6,10 @@
       <img :src="renap" class="p-icon" />
     </div>
     <div class="container mx-auto mt-12">
-      <h1 class="text-3xl text-primary-800 font-semibold">Renap</h1>
+      <h1 class="text-3xl text-primary-800 font-semibold">I AM GT</h1>
       <p class="mt-2 text-sm max-w-[450px] md:max-w-[550px] mb-4 text-justify">
-        Bienvenido al portal emitidor del renap. Escoge el documento que desees emitir únicamente verificando que tengas todos los requisitos 😁 y disfruta del ya no tener más procesos complicados .
+        Bienvenido al portal emitidor de credenciales para la demo I AM GT. Escoge el documento que desees emitir únicamente verificando que tengas todos los requisitos 😁 y disfruta del ya no tener
+        más procesos complicados .
       </p>
       <hr class="mb-8" />
       <div class="flex flex-wrap gap-y-8 gap-x-4 md:gap-x-10 lg:gap-x-16 justify-center md:justify-start">

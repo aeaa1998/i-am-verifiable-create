@@ -85,7 +85,11 @@ export default {
         const { publicKey } = getKeyPair()
         if(!mintAddress || !(mintAddress in getters.candyMachinesMintMapped)){
           const candyMachines = await metaplex.value.candyMachinesV2().findAllBy({ type: "wallet", publicKey: publicKey });
-          candyMachines.forEach((candyMachine) => {
+          candyMachines
+          .filter((candyMachine) => {
+            return candyMachine.itemsRemaining.toString() != '0'
+          })
+          .forEach((candyMachine) => {
             //Use the mint address
             //Alias the nft
             const key = candyMachine.address.toBase58()

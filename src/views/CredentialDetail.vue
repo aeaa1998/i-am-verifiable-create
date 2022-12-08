@@ -131,7 +131,8 @@ const candyMachines = computed(() => {
 const refreshCandyMachine = async (candyMachine) => {
   const key = typeof candyMachine.collectionMintAddress == "string" ? candyMachine.collectionMintAddress : candyMachine.collectionMintAddress.toBase58();
   const { metaplex } = useWorkspace();
-  const updated = metaplex.value.candyMachinesV2().refresh(candyMachine);
+  const updated = await metaplex.value.candyMachinesV2().refresh(candyMachine);
+
   store.dispatch("updateCandyMachine", updated);
 };
 

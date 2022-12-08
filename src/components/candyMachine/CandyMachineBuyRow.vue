@@ -113,8 +113,9 @@ const purchaseNft = async () => {
           candyMachine: candyMachine.value.address,
           wallet: _walletPub.value,
         });
-
-        nftsOfUser.value.push(normalizeNft(response.data.nft));
+        const nft = response.data.nft;
+        nft.transactions = response.data.transactions;
+        nftsOfUser.value.push(normalizeNft(nft));
         emit("purchase:succeded", candyMachine);
         notify({
           type: "success",
