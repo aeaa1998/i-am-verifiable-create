@@ -10,7 +10,7 @@
         'purchase-button-disabled': isInValid,
       }"
       :disabled="isInValid"
-      @click="purchaseNft"
+      @click="verifyButton"
     >
       {{ buttonText }}
     </button> -->
@@ -23,7 +23,7 @@
       :disabled="isInValid"
       v-model:isVerifying="isVerifying"
       @verification:failed="validationFailed"
-      @verification:succeded="validationFailed"
+      @verification:succeded="purchaseNft"
       :requisites="requisites ?? []"
       log
     >
@@ -35,6 +35,7 @@
 import { formatAmount } from "@metaplex-foundation/js";
 import { computed, ref, toRefs } from "vue";
 import { useIamVerification, useNftsOfUser, normalizeNft } from "i-am-verifiable-button/src/useIAmVerifiable";
+// import { useIamVerification, useNftsOfUser, normalizeNft } from "@/composables/useIAmVerifiable";
 import IAmVerifiableButton from "i-am-verifiable-button";
 // import "i-am-verifiable-button/src/css/main.css";
 import { useWorkspace, getKeyPair } from "@/composables/useWorkspace";

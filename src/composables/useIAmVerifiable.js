@@ -1,12 +1,28 @@
-import { Metaplex, Pda, walletAdapterIdentity } from "@metaplex-foundation/js"
+import { Metaplex, Pda } from "@metaplex-foundation/js"
 import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js"
-import { useWallet } from "solana-wallets-vue"
-import { inject, provide, watchEffect } from "vue"
+import { initWallet, useWallet } from "solana-wallets-vue"
+import { inject, provide } from "vue"
 import { computed } from "vue"
-import { onMounted, ref, watch, getCurrentInstance } from "vue"
+import { ref, watch } from "vue"
+import axios from 'axios';
+
+
+function addMonths(numOfMonths, date = new Date()) {
+    date.setMonth(date.getMonth() + numOfMonths);
+  
+    return date;
+  }
+
+function addDays(days, date = new Date()) {
+    let result = new Date(date);
+    result.setDate(date.getDate() + days);
+    return result;
+}
+  
+
 
 const serializeNft = (nft) => JSON.stringify(nft)
-const deserializeNftArray = (array) => JSON.parse(array)
+
 export const normalizeNft = (nftDeserialized) => {
     nftDeserialized.address = new Pda(nftDeserialized.address, 255)
     if(nftDeserialized.mintAddress){
@@ -35,9 +51,8 @@ const _deserializeNft = (nft) => {
 const connection = new Connection(clusterApiUrl('devnet'))
 const metaplex = Metaplex.make(connection)
 const getKey = (req) => `iam-req-${req}`
-const getKeyUserNFTS = (address) => `iam-user-nfts-${address}`
-const getKeyUserNFTSTimestamp = (address) => `iam-user-nfts-timestamp-${address}`
-const clearUserNfts = (address) => localStorage.removeItem(getKeyUserNFTS(address))
+
+
 const findRequisitesByMintList = async (requisites) => {
     //There are requisites
     //remove the duplicates
@@ -45,11 +60,11 @@ const findRequisitesByMintList = async (requisites) => {
     let requisitesInStorage = [... new Set(requisites)].reduce((carry, req) => {
         const reqStorage = localStorage.getItem(getKey(req))
         //It it is found return it
-        if(reqStorage){
-            carry.push(_deserializeNft(reqStorage))
-        }else{
+        // if(reqStorage){
+        //     carry.push(_deserializeNft(reqStorage))
+        // }else{
             missingRequisites.push(reqStorage)
-        }
+        // }
         return carry
     },[])
 
@@ -59,13 +74,7 @@ const findRequisitesByMintList = async (requisites) => {
         _nfts.forEach(nft => {
             localStorage.setItem(getKey(nft.mintAddress ? nft.mintAddress.toBase58() : nft.mint.address.toBase58()), serializeNft(nft))
         })
-        //We dont need to fetch anything else
-        // for (let index = 0; index < _nfts.length; index++) {
-            // const nft = _nfts[index];
-            //It is a metadata model 
-            // if(nft.model == "metadata"){}
-        // }
-        //Add missing requisites
+        
         requisitesInStorage.push(..._nfts)
     }
     return requisitesInStorage
@@ -108,7 +117,8 @@ export function useNftsOfUser(){
 export async function fetchUserNfts(_isFetchingNftsOfUser) {
     const { wallet } = useWallet()
     try {
-        const response = await _axios.get("/user/nfts?wallet=" + wallet.value.publicKey);
+        const { iAmVerifiableAxios } = useIamVerifiable()
+        const response = await iAmVerifiableAxios.get("/user/nfts?wallet=" + wallet.value.publicKey);
         return response.data.nfts.map(normalizeNft)
     } catch(e) {
         return []
@@ -119,8 +129,8 @@ let iamVerifiable = null
 
 export const useIamVerifiable = () => iamVerifiable
 
-export function initIamVerifiable() {
-    
+export function initIamVerifiable(walletOptions) {
+    initWallet(walletOptions)
     const { connected, wallet: _wallet } = useWallet()
     const wallet = useWallet()
     const nftsOfUser = ref([])
@@ -136,17 +146,22 @@ export function initIamVerifiable() {
             isFetchingNftsOfUser.value = true
             nftsOfUser.value = await fetchUserNfts(isFetchingNftsOfUser)
             isFetchingNftsOfUser.value = false
+        }else{
+            nftsOfUser.value = []
         }
     }, { immediate: true })
 
+    const iAmVerifiableAxios = axios.create({
+        //
+        baseURL: 'https://iamverifiable.xyz/'
+    })
     iamVerifiable = {
-        nftsOfUser, isFetchingNftsOfUser
+        nftsOfUser, isFetchingNftsOfUser, iAmVerifiableAxios
     }
     
 }
 
 export async function useIamVerification(requisites){
-    const startTime = new Date();
     requisites = requisites.value  ? requisites.value : requisites
     
     if(!requisites.length) return true
@@ -161,12 +176,33 @@ export async function useIamVerification(requisites){
             isFetchingNftsOfUser.value = false
         }
 
-
-        let credentilsOfCollection = nftsOfUser.value.map(credential => credential.collection.address.toBase58())
+        z
+        let credentilsOfCollection = nftsOfUser.value
+        .filter(credential => {
+            console.log(credential)
+            const expiration = credential.json.expiration
+            if(!expiration){
+                return true
+            }
+            if(!credential.transactions.length) return false
+            const days = parseInt(expiration.days)
+            const months = parseInt(expiration.months)
+            const years = parseInt(expiration.years)
+            let creationDate = new Date(credential.transactions[credential.transactions.length - 1].blockTime * 1000)
+            if(days > 0) creationDate = addDays(days, creationDate)
+            if(months > 0) creationDate = addMonths(months, creationDate)
+            if(years > 0) {
+                creationDate.setFullYear(creationDate.getFullYear() + years)
+            }
+            // console.log(days, months, years)
+            console.log(creationDate)
+            console.log((new Date()) < creationDate)
+            //Check is valid
+            return (new Date()) < creationDate
+        })
+        .map(credential => credential.collection.address.toBase58())
         const isContained = requisites.every(req => credentilsOfCollection.includes(req))
-        const endTime = new Date();
-        const timeDifference = (endTime - startTime)/1000
-        console.log("Verification duration was ", Math.round(timeDifference))
+        
         return isContained
         
         

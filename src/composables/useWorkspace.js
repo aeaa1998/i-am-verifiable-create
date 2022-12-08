@@ -8,7 +8,7 @@ import { awsStorage } from "@metaplex-foundation/js-plugin-aws";
 
 export const getKeyPair = () => {
     
-    return { publicKey: new PublicKey("2kxrCSfcg9NFKBQdnsY6AywKpHouMLXCRofY1CEGaf1R")  }
+    return { publicKey: new PublicKey("iB2MwzS8H5jm8gPvhzyrdDKPi8naL3U4ZQsQspnuXLy")  }
 }
 
 
